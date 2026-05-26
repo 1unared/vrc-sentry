@@ -1,4 +1,7 @@
-# 🛡️ VRC-Sentry
+<h1 align="center">🛡️ VRC-Sentry</h1>
+<p align="center">
+  <img src="assets/blender/vrc-banner.png" width="450" align="center">
+</p>
 
 > *Ever wished managing your VRChat group didn't feel like a second full-time job?*
 
