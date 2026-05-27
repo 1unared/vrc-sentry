@@ -5,6 +5,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	define: {
+		VERSION: JSON.stringify(process.env.npm_package_version)
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
