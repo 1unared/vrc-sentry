@@ -1,4 +1,7 @@
-# 🛡️ VRC-Sentry
+<h1 align="center">🛡️ VRC-Sentry</h1>
+<p align="center">
+  <img src="assets/vrc-banner.png" width="450" align="center">
+</p>
 
 VRC-Sentry is a management and analytics tool designed specifically for VRChat groups. Its primary goal is to consolidate fragmented group data and moderation logs into a single, intuitive dashboard that streamlines staff workflows.
 
