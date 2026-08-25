@@ -1,7 +1,7 @@
 allowBuilds:
   bcrypt: true
   esbuild: true
+  msgpackr-extract: false
 minimumReleaseAgeExclude:
   - cookie@0.7.0
 overrides:
-  cookie@<0.7.0: ^0.7.0
