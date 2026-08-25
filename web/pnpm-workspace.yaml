@@ -1,2 +1,7 @@
 allowBuilds:
+  bcrypt: true
   esbuild: true
+minimumReleaseAgeExclude:
+  - cookie@0.7.0
+overrides:
+  cookie@<0.7.0: ^0.7.0
