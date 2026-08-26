@@ -3,6 +3,7 @@ import { redis } from '../redis';
 import { type JobRegistry, type JobPayload, type JobResult } from './registry';
 import { createHash } from 'node:crypto';
 import { QueueError, UnknownQueueError } from './errors';
+import { CacheHelper } from '../redis/cache';
 
 
 export const defaultJobOptions: DefaultJobOptions = {
@@ -35,26 +36,19 @@ export async function getApiData<T extends keyof JobRegistry>(
 	const jobId = requestHash;
 
 	if (options.force) {
-		await redis.del(cacheKey).catch(console.warn);
-	} else {
-		const cached = await redis.get(cacheKey).catch(() => null);
-		if (cached) {
-			return JSON.parse(cached) as JobResult<T>;
+		await CacheHelper.del(cacheKey);
+	}
+
+	return await CacheHelper.wrap<JobResult<T>>(cacheKey, ttl, async () => {
+		try {
+			const job = await apiQueue.add(type, { ...payload, type } as unknown, { jobId });
+			const result = await job.waitUntilFinished(queueEvents);
+			return result as JobResult<T>;
+		} catch (err) {
+			if (err instanceof QueueError) {
+				throw err;
+			}
+			throw new UnknownQueueError();
 		}
-	}
-
-	try {
-		const job = await apiQueue.add(type, { ...payload, type } as unknown, { jobId });
-
-		const result = await job.waitUntilFinished(queueEvents);
-
-		await redis.set(cacheKey, JSON.stringify(result), 'EX', ttl).catch(console.warn);
-
-		return result as JobResult<T>;
-  } catch (err) {
-    if (err instanceof QueueError) {
-      throw err
-    }
-    throw new UnknownQueueError()
-	}
+	});
 }

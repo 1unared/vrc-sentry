@@ -8,6 +8,7 @@ import { Hono } from 'hono';
 import { DEV_BULLBOARD } from '$env/static/private';
 import { apiQueue } from '$lib/server/bullmq/client';
 import { setupApiBullMQWorker } from '$lib/server/bullmq/worker';
+import { UsersRepository } from '$lib/server/db/repositories/usersRepository';
 
 const bullboard = (() => {
 	const serverAdapter = new HonoAdapter(serveStatic);
@@ -38,21 +39,30 @@ export const handle = async ({ event, resolve }) => {
 	}
 
 	const session = await validateSession(sessionToken);
-
-	if (session) {
-		event.locals.user = {
-			id: session.userId
-		};
-		event.locals.session = {
-			token: session.token
-		};
-
-		if (DEV_BULLBOARD === 'true' && event.url.pathname.match(/^\/jobs($|\/)/)) {
-			return bullboard.fetch(event.request);
-		}
-	} else {
+	if (!session) {
 		event.locals.user = null;
 		event.locals.session = null;
+		return resolve(event);
 	}
+
+	const user = await UsersRepository.readById(session.userId);
+
+	if (!user) {
+		event.locals.user = null;
+		event.locals.session = null;
+		return resolve(event);
+	}
+	event.locals.user = {
+		id: user.id
+	};
+
+	event.locals.session = {
+		token: sessionToken
+	};
+
+	if (DEV_BULLBOARD === 'true' && event.url.pathname.match(/^\/jobs($|\/)/)) {
+		return bullboard.fetch(event.request);
+	}
+
 	return resolve(event);
 };
